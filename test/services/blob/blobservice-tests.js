@@ -985,6 +985,40 @@ describe('BlobService', function () {
     });
   });
 
+  describe('statusCopyBlob', function () {
+    it('should work', function (done) {
+      var sourceContainerName = testutil.generateId(containerNamesPrefix, containerNames, suiteUtil.isMocked);
+      var targetContainerName = testutil.generateId(containerNamesPrefix, containerNames, suiteUtil.isMocked);
+
+      var sourceBlobName = testutil.generateId(blobNamesPrefix, blobNames, suiteUtil.isMocked);
+      var targetBlobName = testutil.generateId(blobNamesPrefix, blobNames, suiteUtil.isMocked);
+
+      var blobText = 'hi there';
+
+      blobService.createContainer(sourceContainerName, function (createErr1) {
+        assert.equal(createErr1, null);
+
+        blobService.createContainer(targetContainerName, function (createErr2) {
+          assert.equal(createErr2, null);
+
+          blobService.createBlockBlobFromText(sourceContainerName, sourceBlobName, blobText, function (uploadErr) {
+            assert.equal(uploadErr, null);
+
+            blobService.copyBlob(blobService.getBlobUrl(sourceContainerName, sourceBlobName), targetContainerName, targetBlobName, function (copyErr) {
+              assert.equal(copyErr, null);
+
+              blobService.statusOfCopyBlob(targetContainerName, targetBlobName, function (statusErr, statusObj) {
+                assert.equal(statusErr, null);
+                assert.equal(statusObj.copyStatus, "success");
+                done();
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+
   describe('listBlobs', function () {
     var containerName;
 
